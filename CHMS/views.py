@@ -3,8 +3,10 @@ from django.shortcuts import render
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
 
+import CHMS
 from CHMS.data import Symptoms, Heards, Cattle, Diagnose
 from CHMS.diseases import *
+from CHMS.models import TblLogin
 
 
 def home(request):
@@ -57,3 +59,26 @@ def symptoms_reciever(request):
         prediction = diagnose.predict()
 
     return HttpResponse(prediction)
+
+
+def sign_in(request):
+    return render(request, 'sign_in.html')
+
+
+def s_in(request):
+    credentials = []
+    if request.method == 'POST':
+        for key, value in request.POST.lists():
+            if key == 'csrfmiddlewaretoken':
+                continue
+            else:
+                credentials.append(value[0])
+
+    try:
+        username = TblLogin.objects.get(username=credentials[0])
+        if username.password == credentials[1]:
+            return HttpResponse("yes")
+        else:
+            return HttpResponse("pass incorrect")
+    except CHMS.models.TblLogin.DoesNotExist:
+        return HttpResponse("u name incorrect")

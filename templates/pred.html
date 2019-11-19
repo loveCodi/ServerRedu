@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+{% load static %}
+<!-- saved from url=(0052)https://getbootstrap.com/docs/4.3/examples/checkout/ -->
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Jekyll v3.8.5">
+    <title>CHMS || Diagnosis</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" crossorigin="anonymous">
+
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+
+    <!-- Custom styles for this template -->
+    <link href="{% static 'css/pred.css' %}" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+<script>
+    var symptos = [];
+</script>
+<div class="container">
+    <div class="py-5 text-center">
+        <h2>Diagnosis</h2>
+        <p class="lead">This form collects the symptoms that you have noticed on your cattle. Press the "Select" button
+            to collect a symptom you have chosen. When your list is done press "Submit" button to Diagnose.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 order-md-2 mb-4">
+            <h4 class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted">Selcted symptoms</span>
+                <span class="badge badge-secondary badge-pill" id="symptom_count">3</span>
+            </h4>
+            <script>
+                var symptos_count = document.getElementById("symptom_count");
+                symptos_count.textContent = symptos.length;
+            </script>
+            <ul class="list-group mb-3" id="symptom_list">
+            </ul>
+            <form class="card p-2" id="form_rino_poster" method="post">
+                {% csrf_token %}
+                <div class="input-group">
+                    <button class="btn btn-secondary btn-block" id="sub" type="submit">Submit</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-8 order-md-1">
+            <h4 class="mb-3">Cattle form</h4>
+            <form class="needs-validation" novalidate="" id="form_racho">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="country">Heard</label>
+                        <select class="custom-select d-block w-100" id="country" required="">
+                            <option value="">Choose...</option>
+                            {% for herd in herds %}
+                                <option id="{{ herd.0 }}">{{ herd.1 }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Please select a valid Heard tittle.
+                        </div>
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <label for="state">Cattle id</label>
+                        <select class="custom-select d-block w-100" id="state" required="">
+                            <option value="">Choose...</option>
+                            {% for mombe in cattle %}
+                                <option id="{{ mombe.0 }}">{{ mombe.0 }} ({{ mombe.2 }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Please provide a cattle id.
+                        </div>
+                    </div>
+                </div>
+                <hr class="mb-4">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="zip">Symptoms</label>
+                        <select class="custom-select d-block w-100" id="symps" required="">
+                            <option value="">Choose...</option>
+                            {% for symptom in symptoms %}
+                                <option id="{{ symptom.0 }}">{{ symptom.1 }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">
+                            Choose a valid symptom.
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-secondary btn-block" id="select">Select</button>
+                <script>
+                    if (symptos.length === 0) {
+                        document.querySelector('#sub').setAttribute('disabled', 'disabled');
+                    }
+                    document.getElementById("select").addEventListener("click", function (event) {
+                            event.preventDefault();
+                            //getting the content for populating the list item
+                            var symptom_for_text_extract = document.getElementById("symps");
+                            var txt = symptom_for_text_extract.options[symptom_for_text_extract.selectedIndex].text;
+                            var match = false;
+
+                            symptos.forEach(function (item) {
+                                if (item === txt)
+                                    match = true;
+                            });
+
+                            if (match) {
+                                alert("Already chosen the symtom");
+                            } else {
+
+                                var symptom_list = document.getElementById("symptom_list");
+
+                                var symptom_list_item = document.createElement("li");
+                                symptom_list_item.className = "list-group-item d-flex justify-content-between lh-condensed";
+
+                                var symptom_list_item_wrapper = document.createElement("div");
+
+                                var symptom = document.createElement("h6");
+                                symptom.className = "my-0";
+
+                                if (txt !== "Choose...") {
+                                    //adding symptoms to the array
+                                    symptos.push(txt);
+                                    //setting text to list
+                                    symptom.textContent = txt;
+
+                                    if (symptos.length > 0) {
+                                        document.querySelector('#sub').disabled = false;
+                                    }
+
+                                    //assembling list item
+                                    symptom_list_item_wrapper.appendChild(symptom);
+                                    symptom_list_item.appendChild(symptom_list_item_wrapper);
+                                    symptom_list.appendChild(symptom_list_item);
+                                    symptos_count.textContent = symptos.length;
+                                }
+                            }
+                        }
+                    );
+                </script>
+                <hr class="mb-4">
+
+                {#                <div class="py-2 text-center">#}
+                {#                    <h2 class="text-danger">Anthrax!</h2>#}
+                {#                    <p class="lead">Your cattle was diagnosed with athrax.</p>#}
+                {#                    <div class="py-4 d-flex justify-content-between align-items-center">#}
+                {#                        <div class="btn-group">#}
+                {#                            <button type="button" class="btn btn-sm btn-outline-secondary">More about Athrax</button>#}
+                {#                        </div>#}
+                {#                    </div>#}
+                {#                </div>#}
+
+            </form>
+        </div>
+    </div>
+
+
+</div>
+<script src="{% static 'js/jquery-3.4.1.js' %}" crossorigin="anonymous"></script>
+<script>
+    window.jQuery || document.write('<script src="/docs/4.3/assets/js/vendor/jquery-slim.min.js"><\/script>')
+</script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
+<script src="{% static 'js/pred-validation.js' %}"></script>
+<script type="text/javascript">
+
+    $('#sub').on("click", function (evt) {
+        evt.preventDefault();
+
+        if (symptos.length < 4) {
+            alert("please enter a minimum of Four symptoms");
+        } else {
+            $.ajax({
+                url: '{% url 'symptoms' %}',
+                type: 'POST',
+                data: {
+                    'symptoms': symptos
+                },
+                success: function (result) {
+                    results(result);
+                },
+                failure: function (data) {
+                    alert('Got an error dude');
+                }
+            });
+        }
+    });
+
+
+    function results(result) {
+        var holding_form = document.getElementById("form_racho");
+
+        var holding_container = document.createElement("div");
+        holding_container.className = "py-2 text-center";
+
+        var disese_racho = document.createElement("h2");
+        disese_racho.className = "text-danger";
+        disese_racho.textContent = result + "!";
+
+        var kadescription = document.createElement("p");
+        kadescription.className = "lead";
+        kadescription.textContent = "Your cattle was diagnosed with " + result;
+
+        var div_remukati = document.createElement("div");
+        div_remukati.className = "py-4 d-flex justify-content-between align-items-center";
+
+        var div_remukati_kati = document.createElement("div");
+        div_remukati_kati.className = "btn-group";
+
+        var button_racho = document.createElement("button");
+        button_racho.setAttribute("type", "button");
+        button_racho.className = "btn btn-sm btn-outline-secondary";
+        button_racho.textContent = "More about " + result;
+        button_racho.addEventListener("click", function (event) {
+            event.preventDefault();
+            var url_racho = '{% url 'pred_res' 1 %}';
+            var url_rimwe_racho = url_racho.replace(/1/g, result);
+            window.location.href = url_rimwe_racho;
+        });
+
+        div_remukati_kati.appendChild(button_racho);
+        div_remukati.appendChild(div_remukati_kati);
+        holding_container.appendChild(disese_racho);
+        holding_container.appendChild(kadescription);
+        holding_container.appendChild(div_remukati);
+        holding_form.appendChild(holding_container);
+    }
+</script>
+
+</body>
+
+</html>
